@@ -1,7 +1,6 @@
 import hashlib
 import json
 from time import time
-from uuid import uuid4
 
 class Blockchain(object):
     def __init__(self):
@@ -59,15 +58,16 @@ class Blockchain(object):
         return guess_hash.endswith("06")
 
 
-blockchain = Blockchain()
+# blockchain = Blockchain()
+#
+# last_proof = blockchain.last_block_loo['proof']
+# proof = blockchain.proof_of_work_loo(last_proof)
+# blockchain.new_block_loo(proof)
+#
+# last_proof = blockchain.last_block_loo['proof']
+# proof = blockchain.proof_of_work_loo(last_proof)
+# blockchain.new_block_loo(proof)
+#
+# print("Blockchain:")
+# print(json.dumps(blockchain.chainLOO, indent=4))
 
-last_proof = blockchain.last_block_loo['proof']
-proof = blockchain.proof_of_work_loo(last_proof)
-blockchain.new_block_loo(proof)
-
-last_proof = blockchain.last_block_loo['proof']
-proof = blockchain.proof_of_work_loo(last_proof)
-blockchain.new_block_loo(proof)
-
-print("Blockchain:")
-print(json.dumps(blockchain.chainLOO, indent=4))
