@@ -1,6 +1,7 @@
 import hashlib
 import json
 from time import time
+from hashlib import sha256
 
 class Blockchain(object):
     def __init__(self):
@@ -10,6 +11,7 @@ class Blockchain(object):
         self.new_block_loo(proof=100, previous_hash='Latyshev', nonce='15062002')
 
     def new_block_loo(self, proof, previous_hash=None, nonce=None):
+        merkle_hash = self.merkle_root(self.currentTransactionsLOO)
 
         block = {
             'index': len(self.chainLOO) + 1,
@@ -17,6 +19,7 @@ class Blockchain(object):
             'transactions': self.currentTransactionsLOO,
             'proof': proof,
             'previous_hash': previous_hash or self.hash_loo(self.chainLOO[-1]),
+            'merkle_root': merkle_hash,
             'nonce': nonce
         }
 
@@ -57,6 +60,23 @@ class Blockchain(object):
         print(f"Проба: {last_proof}, {proof} -> Хеш: {guess_hash}")
         return guess_hash.endswith("06")
 
+    @staticmethod
+    def merkle_root(transactions):
+        if not transactions:
+            return None
+
+        hashes = [sha256(json.dumps(tx, sort_keys=True).encode()).hexdigest() for tx in transactions]
+
+        while len(hashes) > 1:
+            new_level = []
+            for i in range(0, len(hashes), 2):
+                if i + 1 < len(hashes):
+                    new_level.append(sha256((hashes[i] + hashes[i + 1]).encode()).hexdigest())
+                else:
+                    new_level.append(hashes[i])
+            hashes = new_level
+
+        return hashes[0] if hashes else None
 
 # blockchain = Blockchain()
 #
