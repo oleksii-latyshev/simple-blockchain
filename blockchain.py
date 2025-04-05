@@ -1,12 +1,15 @@
 import hashlib
 import json
+import requests
 from time import time
 from hashlib import sha256
+from urllib.parse import urlparse
 
 class Blockchain(object):
     def __init__(self):
         self.chainLOO = []
         self.currentTransactionsLOO = []
+        self.nodesLOO = set()
 
         self.new_block_loo(proof=100, previous_hash='Latyshev', nonce='15062002')
 
@@ -29,6 +32,10 @@ class Blockchain(object):
         print(f"Хеш останнього блоку: {self.hash_loo(block)}")
 
         return block
+
+    def register_node_loo(self, address):
+        parsed_url = urlparse(address)
+        self.nodesLOO.add(parsed_url.netloc)
 
     def new_transaction_loo(self, sender, recipient, amount):
         self.currentTransactionsLOO.append({
@@ -77,6 +84,55 @@ class Blockchain(object):
             hashes = new_level
 
         return hashes[0] if hashes else None
+
+    def valid_chain(self, chain):
+        last_block = chain[0]
+        current_index = 1
+
+        while current_index < len(chain):
+            block = chain[current_index]
+            print(f'{last_block}')
+            print(f'{block}')
+            print("\n-----------\n")
+
+            if block['previous_hash'] != self.hash_loo(last_block):
+                return False
+
+            if not self.valid_proof_loo(last_block['proof'], block['proof']):
+                return False
+
+            last_block = block
+            current_index += 1
+
+        return True
+
+    def resolve_conflicts(self):
+        neighbours = self.nodesLOO
+        new_chain = None
+
+        # Шукаємо тільки ланцюги, довші за наші
+        max_length = len(self.chainLOO)
+
+        # Захоплюємо і перевіряємо всі ланцюги з усіх вузлів мережі
+        for node in neighbours:
+            response = requests.get(f'http://{node}/chain')
+
+            if response.status_code == 200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+
+                # Перевіряємо, чи є довжина найдовшою, а ланцюг — валідним
+                if length > max_length and self.valid_chain(chain):
+                    max_length = length
+                    new_chain = chain
+
+        # Замінюємо ланцюг, якщо знайдемо інший валідний і довший
+        if new_chain:
+            self.chainLOO = new_chain
+            return True
+
+        return False
+
 
 # blockchain = Blockchain()
 #
