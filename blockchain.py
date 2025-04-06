@@ -85,7 +85,7 @@ class Blockchain(object):
 
         return hashes[0] if hashes else None
 
-    def valid_chain(self, chain):
+    def valid_chain_loo(self, chain):
         last_block = chain[0]
         current_index = 1
 
@@ -106,14 +106,12 @@ class Blockchain(object):
 
         return True
 
-    def resolve_conflicts(self):
+    def resolve_conflicts_loo(self):
         neighbours = self.nodesLOO
         new_chain = None
 
-        # Шукаємо тільки ланцюги, довші за наші
         max_length = len(self.chainLOO)
 
-        # Захоплюємо і перевіряємо всі ланцюги з усіх вузлів мережі
         for node in neighbours:
             response = requests.get(f'http://{node}/chain')
 
@@ -121,12 +119,10 @@ class Blockchain(object):
                 length = response.json()['length']
                 chain = response.json()['chain']
 
-                # Перевіряємо, чи є довжина найдовшою, а ланцюг — валідним
-                if length > max_length and self.valid_chain(chain):
+                if length > max_length and self.valid_chain_loo(chain):
                     max_length = length
                     new_chain = chain
 
-        # Замінюємо ланцюг, якщо знайдемо інший валідний і довший
         if new_chain:
             self.chainLOO = new_chain
             return True
